@@ -1,8 +1,0 @@
-package kr.or.connect.vo;
-
-public class Todo {
-	private int id;
-	private String todo;
-	private String completed;
-	private String date;
-}
