@@ -1,0 +1,41 @@
+package kr.or.connect.service;
+
+import java.util.Collection;
+
+import org.springframework.stereotype.Service;
+
+import kr.or.connect.presentation.BookDAO;
+import kr.or.connect.vo.Book;
+
+@Service
+public class TodoService {
+	private BookDAO BookDAO;
+
+	public TodoService(Todo BookDAO) {
+		this.BookDAO = BookDAO;
+	}
+
+	public Book findById(Integer id) {
+		return BookDAO.selectById(id);
+	}
+
+	public Collection<Book> findAll() {
+		return BookDAO.selectAll();
+	}
+
+	public Book create(Book book) {
+		Integer id = BookDAO.insert(book);
+		book.setId(id);
+		return book;
+	}
+
+	public boolean update(Book book) {
+		int affected = BookDAO.update(book);
+		return affected == 1;
+	}
+
+	public boolean delete(Integer id) {
+		int affected = BookDAO.deleteById(id);
+		return affected == 1;
+	}
+}

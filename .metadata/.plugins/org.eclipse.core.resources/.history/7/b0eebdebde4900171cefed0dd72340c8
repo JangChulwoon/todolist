@@ -1,0 +1,136 @@
+(function (window) {
+	'use strict';
+
+	// 페이지가 전부 로드 되면 동작하도록 
+		
+	 var url = "/api/todos";
+	 var todoCount =0;
+	 // 페이지 로딩시 데이터를 가져옴. 
+	 
+	 // getAllData
+	 function getData(){
+		 $.ajax({
+             method: "get",
+             url: "/api/todos",
+             contentType: "application/json; charset=utf-8"
+         }).done(function(data){
+        // 가져오기 
+	 	for(var i = 0; i<data.length; i++){
+	 		// completed 가 1이 아니면 완료것
+	 		// 다른방법 없는지 찾아볼 것.
+	 		var check ="";
+	 		if(data[i].completed ==1){
+	 			data[i].completed = "completed";
+	 			check = "checked";
+	 		}else{
+	 			todoCount++;
+	 			data[i].completed = "";
+	 		}
+      		$(".todo-list").prepend(listForm(data[i].completed,check, data[i].id, data[i].todo));
+      	 }
+	 	 $('.todo-count').text(todoCount);
+	 	 toggle_click();
+        });
+		
+	 };
+	 
+
+	 getData();
+	
+	
+	//insert 부분 .
+	 // 엔터 입력시 text, completed를 insert
+	$("#input-val").keydown(function(key) {
+		var text_val = $("#input-val").val();
+		var completed = "0";
+		var todo = new Object();
+
+		todo.todo = text_val;
+		todo.completed = completed;
+		todo.date = new Date();
+		var data = JSON.stringify(todo);
+		
+		if(text_val){
+			if ( key.keyCode == 13) {
+				// data 전송
+				$.ajax({
+	               method: "POST",
+	               url: "/api/todos",
+	               contentType: "application/json; charset=utf-8",
+	               dataType: "json",
+	               data: data
+               }).done(function(data){
+            	   // 할일 ++ 
+            	   todoCount++;
+            	   $('.todo-count').text(todoCount);  
+            	   // 입력 후 초기화
+                   $('#input-val').val('');
+                   $(".todo-list").prepend(listForm("","","",data.todo));
+                   toggle_click();
+              });
+				
+			}
+		}
+	});
+
+	 // list form
+    function listForm( completed,state,id, TodoText){
+        return '<li class=' + completed+ '>'
+        			+'<div class="view">'
+        				+'<input class="toggle" type="checkbox"  '+ state +' data-id = "'+id+'">'
+    					+'<label>' + TodoText
+    					+'</label>'
+    					+'<button class="destroy"></button>'
+					+'</div>'
+					+'<input class="edit" value="">'
+				+'</li>';
+    };
+
+    
+    function toggle_click(){
+		 $(".toggle").on("change",function() {
+				if($(this).is(":checked")) {
+					$(this).parents("li").addClass("completed");
+					todoCount--;
+					// 수정 메서드  
+				}else{
+					$(this).parents("li").removeClass("completed");
+					todoCount++;
+					// 데이터 수정해야댐 
+				}
+				$('.todo-count').text(todoCount);
+			});	
+	}
+    
+    function functionUpdateComplete(){
+    	
+    }
+    
+	$().ready(function(){
+
+		
+		// toggle 을 눌렀을때 동작  completed 추가/삭제 
+		
+		 $(".destroy").on("click",function(){
+			 // 삭제하는 로직 
+			 var id = $(this).siblings(".toggle").data("id");
+			 var parent = $(this).parents("li");
+				$.ajax({
+		               method: "DELETE",
+		               url: "/api/todos/"+id,
+		               contentType: "application/json; charset=utf-8",
+		               dataType: "json"
+	               }).done(function(data){
+	            	   // 만약 완료가 아니라면 카운트 지워야댐 
+	            	   parent.remove();
+	            	   console.log("성공");
+	              }).fail(function(){ 
+	            	  console.log("요청 실패시 호출") 
+            	  })
+
+		 });
+		
+	});
+	
+     // update 랑 delete  가져오고 , 특정 값에 대한 정보 가져올수 잇도록만 하면 끝
+})(window);

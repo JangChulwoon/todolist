@@ -1,0 +1,5 @@
+package kr.or.connect.vo;
+
+public class Todo {
+
+}
